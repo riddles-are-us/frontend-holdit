@@ -8,10 +8,7 @@ import { Task } from "zkwasm-service-helper";
 import { bytesToBN } from "../utils/proof";
 import { contract_abi, parseArgs } from "../data/image";
 import BN from "bn.js";
-import Tab from "react-bootstrap/Tab";
-import Tabs from "react-bootstrap/Tabs";
 import { selectL1Account } from "../data/accountSlice";
-//import { selectConfig } from "../data/statusSlice";
 import { zkwasmHelper } from "../data/endpoint";
 import { hexAbbreviation } from "../utils/address";
 

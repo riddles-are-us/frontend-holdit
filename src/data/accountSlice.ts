@@ -38,7 +38,7 @@ async function loginL2Account(address: string): Promise<L2AccountInfo> {
 export interface AccountState {
   l1Account?: L1AccountInfo;
   l2account?: L2AccountInfo;
-  status: 'Loading' | 'Ready';
+  status: 'LoadingL1' | 'LoadingL2' | 'L1AccountError' | 'L2AccountError' | 'Ready';
 }
 
 export interface State {
@@ -46,7 +46,7 @@ export interface State {
 }
 
 const initialState: AccountState = {
-  status: 'Loading',
+  status: 'LoadingL1',
 };
 
 // The function below is called a thunk and allows us to perform async logic. It
@@ -82,21 +82,30 @@ export const accountSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(loginL1AccountAsync.pending, (state) => {
-        state.status = 'Loading';
+        state.status = 'LoadingL1';
       })
       .addCase(loginL1AccountAsync.fulfilled, (state, c) => {
-        state.status = 'Ready';
+        state.status = 'LoadingL2';
         console.log(c);
         state.l1Account = c.payload;
       })
+      .addCase(loginL1AccountAsync.rejected, (state, c) => {
+        state.status = 'L1AccountError';
+        console.log(c);
+      })
       .addCase(loginL2AccountAsync.pending, (state) => {
-        state.status = 'Loading';
+        state.status = 'LoadingL2';
       })
       .addCase(loginL2AccountAsync.fulfilled, (state, c) => {
         state.status = 'Ready';
         console.log(c);
         state.l2account = c.payload;
       })
+      .addCase(loginL2AccountAsync.rejected, (state, c) => {
+        state.status = 'L2AccountError';
+        console.log(c);
+      })
+
   },
 });
 

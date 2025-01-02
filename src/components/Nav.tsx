@@ -9,10 +9,6 @@ import {
   Nav,
 } from "react-bootstrap";
 
-import HistoryTasks from "../modals/History";
-
-import { selectMD5, selectGameLoaded } from "../data/game";
-
 interface IProps {
   currency: number;
   handleRestart: () => void;
@@ -20,11 +16,8 @@ interface IProps {
 
 export function MainNavBar(props: IProps) {
   const dispatch = useAppDispatch();
-
   const account = useAppSelector(selectL1Account);
   const l2account = useAppSelector(selectL2Account);
-  const md5 = useAppSelector(selectMD5);
-  const gameLoaded = useAppSelector(selectGameLoaded);
 
   useEffect(() => {
     dispatch(loginL1AccountAsync());
@@ -43,14 +36,6 @@ export function MainNavBar(props: IProps) {
 
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
-            {gameLoaded && md5 &&
-            <>
-               <Nav.Link className="px-2 my-2 py-0">
-                   <HistoryTasks md5={md5}></HistoryTasks>
-               </Nav.Link>
-            </>
-            }
-
             {l2account && (
               <>
                 <Navbar.Text>
