@@ -52,10 +52,8 @@ export default function Nav() {
 
           </MDBNavbarNav>
         </MDBCollapse>
-          <form className='d-flex input-group w-auto'>
             <ConnectButton handleRestart={()=>{return;}}></ConnectButton>
             <LoginButton handleRestart={()=>{return;}}></LoginButton>
-          </form>
       </MDBContainer>
     </MDBNavbar>
   );

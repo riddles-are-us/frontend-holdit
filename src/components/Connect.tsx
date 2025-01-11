@@ -11,13 +11,17 @@ interface IProps {
 
 export function ConnectButton(props: IProps) {
   const dispatch = useAppDispatch();
+  const l1account = useAppSelector(AccountSlice.selectL1Account);
   function connect() {
-    alert("connect");
     dispatch(AccountSlice.loginL1AccountAsync());
   }
-  return (
-    <MDBBtn onClick={connect}>connect </MDBBtn>
-  );
+  if (l1account) {
+    return <span>{l1account!.address}</span>
+  } else {
+    return (
+        <MDBBtn onClick={connect}>connect </MDBBtn>
+    );
+  }
 }
 
 export function LoginButton(props: IProps) {
@@ -29,7 +33,11 @@ export function LoginButton(props: IProps) {
     }
   }
 
-  return (
-    <MDBBtn onClick={login}>login</MDBBtn>
-  );
+  if (l1account) {
+    return (
+      <MDBBtn onClick={login}>login apps</MDBBtn>
+    );
+  } else {
+    return <></>
+  }
 }
