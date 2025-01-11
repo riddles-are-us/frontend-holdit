@@ -8,16 +8,16 @@ import { Task } from "zkwasm-service-helper";
 import { bytesToBN } from "../utils/proof";
 import { contract_abi, parseArgs } from "../data/image";
 import BN from "bn.js";
-import { selectL1Account } from "../data/accountSlice";
 import { zkwasmHelper } from "../data/endpoint";
 import { hexAbbreviation } from "../utils/address";
+import {AccountSlice} from "zkwasm-minirollup-browser";
 
 export interface ProofInfoProps {
   task: Task;
 }
 
 export function ProofInfoModal(info: ProofInfoProps) {
-  const account = useAppSelector(selectL1Account);
+  const account = useAppSelector(AccountSlice.selectL1Account);
   const task = info.task;
   const aggregate_proof = bytesToBN(task.proof);
   const instances = bytesToBN(task.instances);

@@ -9,7 +9,7 @@ import closeIcon from "../assets/main/modal_close.png";
 import { useAppSelector } from "../app/hooks";
 import "./style.scss";
 import React from "react";
-import { selectL1Account } from "../data/accountSlice";
+import {AccountSlice} from "zkwasm-minirollup-browser";
 export interface ModalCommonProps {
   btnLabel: React.ReactNode;
   title: string;
@@ -33,7 +33,7 @@ export enum ModalStatus {
 
 export function ModalCommon(props: ModalCommonProps) {
   const [show, setShow] = useState(false);
-  const account = useAppSelector(selectL1Account);
+  const account = useAppSelector(AccountSlice.selectL1Account);
   const handleClose = () => {
     if (props.handleClose) {
       props.handleClose();

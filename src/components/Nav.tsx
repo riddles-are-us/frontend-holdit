@@ -1,87 +1,62 @@
-import React, { createRef, useState, useEffect, useRef } from "react";
-import "./style.scss";
-import { useAppSelector, useAppDispatch } from "../app/hooks";
-import { loginL1AccountAsync, selectL1Account, loginL2AccountAsync, selectL2Account } from "../data/accountSlice";
-import { addressAbbreviation } from "../utils/address";
+import React, { useState } from 'react';
+import { ConnectButton, LoginButton } from "../components/Connect";
 import {
-  Container,
-  Navbar,
-  Nav,
-} from "react-bootstrap";
+  MDBContainer,
+  MDBNavbar,
+  MDBNavbarBrand,
+  MDBNavbarToggler,
+  MDBIcon,
+  MDBNavbarNav,
+  MDBNavbarItem,
+  MDBNavbarLink,
+  MDBBtn,
+  MDBDropdown,
+  MDBDropdownToggle,
+  MDBDropdownMenu,
+  MDBDropdownItem,
+  MDBCollapse,
+} from 'mdb-react-ui-kit';
+import {AccountSlice} from "zkwasm-minirollup-browser";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 
-interface IProps {
-  currency: number;
-  handleRestart: () => void;
-}
-
-export function MainNavBar(props: IProps) {
-  const dispatch = useAppDispatch();
-  const account = useAppSelector(selectL1Account);
-  const l2account = useAppSelector(selectL2Account);
-
-  useEffect(() => {
-    dispatch(loginL1AccountAsync());
-  }, []);
+export default function Nav() {
+  const [openBasic, setOpenBasic] = useState(false);
+  const l1account = useAppSelector(AccountSlice.selectL1Account);
 
   return (
-    <Navbar style={{ zIndex: "1000" }}>
-      <Container className="justify-content-md-between">
-        <Navbar.Brand>
-          M4 SDK Playground
-        </Navbar.Brand>
-        <Nav.Item className="action-items d-flex">
-        </Nav.Item>
+    <MDBNavbar expand='lg' light bgColor='light'>
+      <MDBContainer fluid>
+        <MDBNavbarBrand href='#'>ZKWASM DAPPS</MDBNavbarBrand>
 
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <MDBNavbarToggler
+          aria-controls='navbarSupportedContent'
+          aria-expanded='false'
+          aria-label='Toggle navigation'
+          onClick={() => setOpenBasic(!openBasic)}
+        >
+          <MDBIcon icon='bars' fas />
+        </MDBNavbarToggler>
 
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
-            {l2account && (
-              <>
-                <Navbar.Text>
-                  <div>Processing Key</div>
-                  <div>{l2account.address}</div>
-                </Navbar.Text>
-              </>
-            )}
+        <MDBCollapse navbar open={openBasic}>
+          <MDBNavbarNav className='mr-auto mb-2 mb-lg-0'>
+            <MDBNavbarItem>
+              <MDBNavbarLink active aria-current='page' href='#'>
+                Home
+              </MDBNavbarLink>
+            </MDBNavbarItem>
+            <MDBNavbarItem>
+              <MDBNavbarLink active aria-current='page' href='#'>
+                      <span>{l1account && l1account!.address}</span>
+              </MDBNavbarLink>
+            </MDBNavbarItem>
 
-            {account && !l2account && (
-              <>
-                <Nav.Link
-                  onClick={() => dispatch(loginL2AccountAsync(account!))}
-                  className="px-2 my-2 py-0"
-                >
-                  Derive Processing Key
-                </Nav.Link>
-              </>
-            )}
-
-            {!account && (
-              <>
-                <Nav.Link
-                  onClick={() => dispatch(loginL1AccountAsync())}
-                  className="px-2 my-2 py-0"
-                >
-                  Connect Wallet
-                </Nav.Link>
-              </>
-            )}
-
-
-            {account && (
-              <>
-                <Navbar.Text>
-                  <div>Account</div>
-                  <div>{addressAbbreviation(account.address, 4)}</div>
-                </Navbar.Text>
-              </>
-            )}
-
-
-
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+          </MDBNavbarNav>
+        </MDBCollapse>
+          <form className='d-flex input-group w-auto'>
+            <ConnectButton handleRestart={()=>{return;}}></ConnectButton>
+            <LoginButton handleRestart={()=>{return;}}></LoginButton>
+          </form>
+      </MDBContainer>
+    </MDBNavbar>
   );
 }

@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import "./style.scss";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { loginL1AccountAsync, selectL1Account, loginL2AccountAsync, selectL2Account } from "../data/accountSlice";
+import {AccountSlice} from "zkwasm-minirollup-browser";
+import {
+    MDBBtn,
+} from 'mdb-react-ui-kit';
 interface IProps {
   handleRestart: () => void;
 }
@@ -9,24 +12,24 @@ interface IProps {
 export function ConnectButton(props: IProps) {
   const dispatch = useAppDispatch();
   function connect() {
-    dispatch(loginL1AccountAsync());
+    alert("connect");
+    dispatch(AccountSlice.loginL1AccountAsync());
   }
-
   return (
-    <div onClick={connect}>connect</div>
+    <MDBBtn onClick={connect}>connect </MDBBtn>
   );
 }
 
 export function LoginButton(props: IProps) {
   const dispatch = useAppDispatch();
-  const l1account = useAppSelector(selectL1Account);
+  const l1account = useAppSelector(AccountSlice.selectL1Account);
   function login() {
     if (l1account) {
-        dispatch(loginL2AccountAsync(l1account!));
+        dispatch(AccountSlice.loginL2AccountAsync(l1account!));
     }
   }
 
   return (
-    <div onClick={login}>login</div>
+    <MDBBtn onClick={login}>login</MDBBtn>
   );
 }

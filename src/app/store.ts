@@ -1,5 +1,5 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import accountReducer from '../data/accountSlice';
+import { AccountSliceReducer } from 'zkwasm-minirollup-browser';
 import endpointReducer from "../data/endpoint";
 export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
@@ -16,7 +16,7 @@ export const store = configureStore({
       },
     }),
   reducer: {
-    account: accountReducer,
+    account: AccountSliceReducer,
     endpoint: endpointReducer,
   },
 });
