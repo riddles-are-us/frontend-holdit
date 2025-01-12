@@ -44,12 +44,6 @@ export default function Nav() {
                 Home
               </MDBNavbarLink>
             </MDBNavbarItem>
-            <MDBNavbarItem>
-              <MDBNavbarLink active aria-current='page' href='#'>
-                      <span>{l1account && l1account!.address}</span>
-              </MDBNavbarLink>
-            </MDBNavbarItem>
-
           </MDBNavbarNav>
         </MDBCollapse>
             <ConnectButton handleRestart={()=>{return;}}></ConnectButton>

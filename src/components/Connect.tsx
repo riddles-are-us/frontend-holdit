@@ -5,6 +5,7 @@ import {AccountSlice} from "zkwasm-minirollup-browser";
 import {
     MDBBtn,
 } from 'mdb-react-ui-kit';
+import { addressAbbreviation } from "../utils/address";
 interface IProps {
   handleRestart: () => void;
 }
@@ -16,7 +17,7 @@ export function ConnectButton(props: IProps) {
     dispatch(AccountSlice.loginL1AccountAsync());
   }
   if (l1account) {
-    return <span>{l1account!.address}</span>
+    return <span>{addressAbbreviation(l1account!.address, 5)}</span>
   } else {
     return (
         <MDBBtn onClick={connect}>connect </MDBBtn>
@@ -27,16 +28,20 @@ export function ConnectButton(props: IProps) {
 export function LoginButton(props: IProps) {
   const dispatch = useAppDispatch();
   const l1account = useAppSelector(AccountSlice.selectL1Account);
+  const l2account = useAppSelector(AccountSlice.selectL2Account);
   function login() {
     if (l1account) {
-        dispatch(AccountSlice.loginL2AccountAsync(l1account!));
+        dispatch(AccountSlice.loginL2AccountAsync("ZKWASM-BEAT"));
     }
   }
 
   if (l1account) {
-    return (
-      <MDBBtn onClick={login}>login apps</MDBBtn>
-    );
+    if (l2account) {
+      const l2addresshex = "0x" + l2account.address;
+      return <span>ID: {addressAbbreviation(l2addresshex, 5)}</span>
+    } else {
+      return <MDBBtn onClick={login}>login apps</MDBBtn>
+    }
   } else {
     return <></>
   }
