@@ -26,7 +26,7 @@ export default function Nav() {
   return (
     <MDBNavbar expand='lg' light bgColor='light'>
       <MDBContainer fluid>
-        <MDBNavbarBrand href='#'>ZKWASM DAPPS</MDBNavbarBrand>
+        <MDBNavbarBrand href='#'>Hold Firmly</MDBNavbarBrand>
 
         <MDBNavbarToggler
           aria-controls='navbarSupportedContent'
@@ -40,7 +40,7 @@ export default function Nav() {
         <MDBCollapse navbar open={openBasic}>
           <MDBNavbarNav className='mr-auto mb-2 mb-lg-0'>
             <MDBNavbarItem>
-              <MDBNavbarLink active aria-current='page' href='#'>
+              <MDBNavbarLink active aria-current='page' >
                 Home
               </MDBNavbarLink>
             </MDBNavbarItem>
