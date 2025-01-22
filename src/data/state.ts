@@ -34,7 +34,7 @@ interface GlobalState {
   currentRound: number,
   prepare: number,
   ratio: number,
-
+  players: any,
 }
 
 interface UserState {
@@ -85,6 +85,7 @@ export const propertiesSlice = createSlice({
             currentRound: loadedState.currentRound,
             prepare: loadedState.prepare,
             ratio: loadedState.ratio,
+            players: [],
           }
         }
         if(loadedPlayer != null) {
@@ -107,6 +108,7 @@ export const propertiesSlice = createSlice({
             currentRound: loadedState.currentRound,
             prepare: loadedState.prepare,
             ratio: loadedState.ratio,
+            players: loadedState.players,
           }
         }
         if(loadedPlayer != null) {

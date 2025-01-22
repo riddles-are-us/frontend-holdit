@@ -41,7 +41,12 @@ export default function Nav() {
           <MDBNavbarNav className='mr-auto mb-2 mb-lg-0'>
             <MDBNavbarItem>
               <MDBNavbarLink active aria-current='page' >
-                Home
+                Deposit 
+              </MDBNavbarLink>
+            </MDBNavbarItem>
+            <MDBNavbarItem>
+              <MDBNavbarLink active aria-current='page' >
+                Withdraw 
               </MDBNavbarLink>
             </MDBNavbarItem>
           </MDBNavbarNav>

@@ -4,7 +4,7 @@ import styled from "styled-components";
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./style.scss";
-import {Container, Row, Col} from "react-bootstrap";
+import {Container, Row, Col, Button} from "react-bootstrap";
 import Footer from "../components/Foot";
 import Nav from "../components/Nav";
 import Banner from "../components/Banner";
@@ -90,8 +90,15 @@ export function Main() {
       <li>counter: {userState?.state?.counter}</li>
       </div>
 
-      <button onClick={place}>place</button>
-      <button onClick={checkout}>checkout</button>
+      <Button onClick={place}>place</Button>
+      <Button onClick={checkout}>checkout</Button>
+
+      <div>{userState?.state?.players?.length} players has entered the arena </div>
+      <>
+      {userState?.state?.players.map((x:any) => 
+        <div>{x.pid}</div>
+      )}
+      </>
 
     </>
   );
