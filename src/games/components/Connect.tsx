@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import "./style.scss";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {AccountSlice} from "zkwasm-minirollup-browser";
 import {
     MDBBtn,
 } from 'mdb-react-ui-kit';
-import { addressAbbreviation } from "../utils/address";
+import { addressAbbreviation } from "../../utils/address";
 interface IProps {
   handleRestart: () => void;
 }

@@ -1,13 +1,14 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { AccountSliceReducer } from 'zkwasm-minirollup-browser';
-import stateReducer from "../data/state";
 import endpointReducer from "../data/endpoint";
+import holditReducer from "../data/holdit/holdit";
+
 export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['acccount/deriveL2Account/fulfilled'],
-        ignoredActionPaths: ['payload.web3','payload.seed', 'payload.injector', 'meta.arg.cmd'],
+        ignoredActions: ['acccount/deriveL2Account/fulfilled', 'meta.arg.l2account'],
+        ignoredActionPaths: ['payload.web3','payload.seed', 'payload.injector', 'meta.arg.cmd', 'meta.arg.l2account'],
         ignoredPaths: [
           "acccount/fetchAccount/fulfilled",
           "account.l1Account.web3",
@@ -19,7 +20,7 @@ export const store = configureStore({
   reducer: {
     account: AccountSliceReducer,
     endpoint: endpointReducer,
-    holdit: stateReducer,
+    holdit: holditReducer,
   },
 });
 

@@ -1,17 +1,18 @@
 /* eslint-disable */
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import Popups from "../games/components/Popups";
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./style.scss";
 import {Container, Row, Col, Button} from "react-bootstrap";
-import Footer from "../components/Foot";
-import Nav from "../components/Nav";
-import Banner from "../components/Banner";
-import { selectUIState, selectUserState, UIState} from "../data/state";
+import Footer from "../games/components/Foot";
+import Nav from "../games/components/Nav";
+import Banner from "../games/components/Banner";
+import { selectUIState, selectUserState, UIState} from "../data/holdit/properties";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
 import { AccountSlice } from "zkwasm-minirollup-browser";
-import { queryState, sendTransaction } from "../request";
+import { queryState, sendTransaction } from "../games/request";
 import { createCommand } from "zkwasm-minirollup-rpc";
 
 const CMD_INSTALL_PLAYER = 1n;
@@ -28,7 +29,7 @@ export function Main() {
   const [inc, setInc] = useState(0);
 
   function updateState() {
-    if (uiState == UIState.Idle) {
+    if (l2account && uiState == UIState.Idle) {
       dispatch(queryState(l2account!.address));
     }
     setInc(inc + 1);
@@ -77,7 +78,7 @@ export function Main() {
     <>
       <Nav/>
       <p>
-      {uiState}
+      {JSON.stringify(uiState)}
       </p>
       <div>
       <li>player nonce: {userState?.player?.nonce}</li>
@@ -95,11 +96,11 @@ export function Main() {
 
       <div>{userState?.state?.players?.length} players has entered the arena </div>
       <>
-      {userState?.state?.players.map((x:any) => 
+      {userState?.state?.players.map((x:any) =>
         <div>{x.pid}</div>
       )}
       </>
-
+      <Popups />
     </>
   );
 }
