@@ -85,10 +85,7 @@ export const WithdrawModal = ({
       })
     ).then((action) => {
       if (AccountSlice.depositAsync.fulfilled.match(action)) {
-        console.log(action.payload);
-        // TODO: return transaction receipt in reduxstate, current is void
-        setInfoMessage("Deposit Success: " +  action.payload);
-        //setInfoMessage("Deposit Success");
+        setInfoMessage("Deposit Success: " +  action.payload!.hash);
         setResultModal(true);
         setIsExecuting(false);
         closeModal();

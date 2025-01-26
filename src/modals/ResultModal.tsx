@@ -1,15 +1,6 @@
-import React, { useState } from "react";
-import { selectUserState } from "../data/holdit/properties";
-import {
-  ResourceType,
-} from "../data/holdit/models";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { sendTransaction } from "../games/request";
-import { getWithdrawTransactionCommandArray } from "../games/rpc";
-import { AccountSlice } from "zkwasm-minirollup-browser";
-import { selectResource } from "../data/holdit/resources";
-import { Alert, Modal, Button, InputGroup, Form, Spinner } from "react-bootstrap";
-import { formatErrorMessage } from "../utils/errorMessage";
+import React from "react";
+import { Alert, Modal, Button } from "react-bootstrap";
+import "./style.scss";
 
 interface Props {
   isWithdraw: boolean;
