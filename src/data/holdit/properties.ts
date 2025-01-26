@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from "../../app/store";
 import { getConfig, sendTransaction, queryState } from "../../games/request"
-import { ConfirmPopupInfo, ResourceAmountPair, emptyConfirmPopupInfo } from "./models"
 
 export enum UIState{
   Init,
@@ -14,11 +13,6 @@ export enum UIState{
   CollectingTxInfo,
   CollectingDepositInfo,
   WaitingDepositReply,
-  WithdrawPopup,
-  WithdrawPopupLoading,
-  DepositPopup,
-  DepositPopupLoading,
-  ConfirmPopup,
   QueryConfig,
 }
 
@@ -53,16 +47,12 @@ interface PropertiesState {
     uiState: UIState;
     activityState: ActivityState;
     userState: UserState | null;
-    nonce: string;
-    confirmPopupInfo: ConfirmPopupInfo;
 }
 
 const initialState: PropertiesState = {
     uiState: UIState.Init,
     activityState: ActivityState.Released,
-    userState: null,
-    nonce: "0",
-    confirmPopupInfo: emptyConfirmPopupInfo,
+    userState: null
 };
 
 export const propertiesSlice = createSlice({
@@ -72,12 +62,9 @@ export const propertiesSlice = createSlice({
     setUIState: (state, action) => {
       state.uiState = action.payload;
     },
-    setConfirmPopupInfo: (state, action) => {
-      state.confirmPopupInfo = action.payload;
-    },
     setActivityState: (state, action) => {
       state.activityState = action.payload;
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -142,8 +129,6 @@ export const propertiesSlice = createSlice({
 export const selectIsLoading = (state: RootState) => state.holdit.properties.uiState == UIState.Loading;
 export const selectUserState = (state: RootState) => state.holdit.properties.userState;
 export const selectUIState = (state: RootState) => state.holdit.properties.uiState;
-export const selectNonce = (state: RootState) => BigInt(state.holdit.properties.nonce);
-export const selectConfirmPopupInfo = (state: RootState) => state.holdit.properties.confirmPopupInfo;
 
-export const { setUIState, setConfirmPopupInfo } = propertiesSlice.actions;
+export const { setUIState } = propertiesSlice.actions;
 export default propertiesSlice.reducer;

@@ -9,41 +9,29 @@ import {
   MDBNavbarNav,
   MDBNavbarItem,
   MDBNavbarLink,
-  MDBBtn,
-  MDBDropdown,
-  MDBDropdownToggle,
-  MDBDropdownMenu,
-  MDBDropdownItem,
   MDBCollapse,
 } from 'mdb-react-ui-kit';
 import {AccountSlice} from "zkwasm-minirollup-browser";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import {
-  selectIsLoading,
-  setUIState,
-  UIState,
-} from "../../data/holdit/properties";
+import { useAppSelector } from "../../app/hooks";
+import { WithdrawModal } from "../../modals/WithdrawModal";
+import { ResultModal } from "../../modals/ResultModal";
 
 export default function Nav() {
-  const [depositModal, setDepositModal] = useState(false);
   const [withdrawModal, setWithdrawModal] = useState(false);
+  const [isWithdraw, setIsWithdraw] = useState(false);
+  const [resultModal, setResultModal] = useState(false);
   const [openBasic, setOpenBasic] = useState(false);
+  const [infoMessage, setInfoMessage] = useState("");
   const l1account = useAppSelector(AccountSlice.selectL1Account);
-  const dispatch = useAppDispatch();
-  const isLoading = useAppSelector(selectIsLoading);
-  
-  //const isLoading = uiState == UIState.Loading;
-
-  const onClickWithdraw = () => {
-    if (!isLoading) {
-      dispatch(setUIState(UIState.WithdrawPopup));
-    }
-  };
 
   const onClickDeposit = () => {
-    if (!isLoading) {
-      dispatch(setUIState(UIState.DepositPopup));
-    }
+    setWithdrawModal(true);
+    setIsWithdraw(false);
+  };
+
+  const onClickWithdraw = () => {
+    setWithdrawModal(true);
+    setIsWithdraw(true);
   };
 
   return (
@@ -77,6 +65,18 @@ export default function Nav() {
         <ConnectButton handleRestart={()=>{return;}}></ConnectButton>
         <LoginButton handleRestart={()=>{return;}}></LoginButton>
       </MDBContainer>
+      <WithdrawModal
+        isWithdraw={isWithdraw}
+        setResultModal={setResultModal}
+        setInfoMessage={setInfoMessage}
+        show={withdrawModal}
+        onClose={() => setWithdrawModal(false)}/>
+      <ResultModal
+        isWithdraw={isWithdraw}
+        infoMessage={infoMessage}
+        setInfoMessage={setInfoMessage}
+        show={resultModal}
+        onClose={() => setResultModal(false)}/>
     </MDBNavbar>
   );
 }

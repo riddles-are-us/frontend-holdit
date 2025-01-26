@@ -79,7 +79,7 @@ export const sendTransaction = createAsyncThunk(
       console.log("(Data-Transaction)", state);
       return state;
     } catch (err: any) {
-      return rejectWithValue(err);
+      return rejectWithValue(err.message || "An unknown error occurred");
     }
   }
 );

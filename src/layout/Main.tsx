@@ -1,7 +1,6 @@
 /* eslint-disable */
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Popups from "../games/components/Popups";
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./style.scss";
@@ -96,11 +95,10 @@ export function Main() {
 
       <div>{userState?.state?.players?.length} players has entered the arena </div>
       <>
-      {userState?.state?.players.map((x:any) =>
+      {userState?.state?.players?.map((x:any) =>
         <div>{x.pid}</div>
       )}
       </>
-      <Popups />
     </>
   );
 }

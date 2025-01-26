@@ -72,15 +72,3 @@ export function getNumberAbbr(num: number): string {
 
   return sign + num.toString();
 }
-
-export interface ConfirmPopupInfo {
-  title: string;
-  description: string;
-  isError: boolean;
-}
-
-export const emptyConfirmPopupInfo: ConfirmPopupInfo = {
-  title: "",
-  description: "",
-  isError: false,
-};
