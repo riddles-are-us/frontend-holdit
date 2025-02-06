@@ -1,6 +1,7 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import { AccountSliceReducer } from 'zkwasm-minirollup-browser';
 import stateReducer from "../data/state";
+import hisotyrReducer from "../data/ui";
 import endpointReducer from "../data/endpoint";
 export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
@@ -20,6 +21,7 @@ export const store = configureStore({
     account: AccountSliceReducer,
     endpoint: endpointReducer,
     holdit: stateReducer,
+    history: hisotyrReducer,
   },
 });
 

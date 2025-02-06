@@ -12,7 +12,7 @@ const rpc = new ZKWasmAppRpc(fullUrl);
 
 async function queryConfigI() {
   try {
-    const state = await rpc.query_config();
+    const state = await rpc.queryConfig();
     return state;
   } catch (error) {
     throw "QueryStateError " + error;
@@ -84,8 +84,36 @@ export const sendTransaction = createAsyncThunk(
   }
 );
 
+export const sendExtrinsicTransaction = createAsyncThunk(
+  'client/sendExtrinsicTransaction',
+  async (params: {cmd: BigUint64Array, prikey: string }, { rejectWithValue }) => {
+    try {
+      const { cmd, prikey } = params;
+      const state: any = await rpc.sendExtrinsic(cmd, prikey);
+      console.log("(Data-Transaction)", state);
+      return state;
+    } catch (err: any) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
+
 export const queryState = createAsyncThunk(
   'client/queryState',
+  async (key: string, { rejectWithValue }) => {
+    try {
+      const state: any = await queryStateI(key);
+      console.log("(Data-QueryState)", state);
+      return state;
+    } catch (err: any) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
+export const queryInitialState = createAsyncThunk(
+  'client/queryInitialState',
   async (key: string, { rejectWithValue }) => {
     try {
       const state: any = await queryStateI(key);

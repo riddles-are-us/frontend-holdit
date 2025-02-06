@@ -1,18 +1,34 @@
 /* eslint-disable */
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./style.scss";
-import {Container, Row, Col, Button} from "react-bootstrap";
-import Footer from "../components/Foot";
 import Nav from "../components/Nav";
-import Banner from "../components/Banner";
-import { selectUIState, selectUserState, UIState} from "../data/state";
+import { selectConnectState, selectUserState} from "../data/state";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
-import { AccountSlice } from "zkwasm-minirollup-browser";
-import { queryState, sendTransaction } from "../request";
+import { AccountSlice, ConnectState } from "zkwasm-minirollup-browser";
+import { queryInitialState, queryState, sendTransaction } from "../request";
 import { createCommand } from "zkwasm-minirollup-rpc";
+import SquareCanvas from "./../components/canvas";
+import ChatHistoryInput from "../components/chat";
+import Event from "../components/event";
+import BetHistory from "../components/BetHistory";
+import Overview from "../components/Overview";
+import { stage }  from "../components/canvas";
+import {SpanButton} from "../components/Ratio";
+
+import padLeft from "../images/ratio/frame_left.png";
+import padRight from "../images/ratio/frame_right.png";
+import padMid from "../images/ratio/frame_middle.png";
+
+const padLeftImage = new Image();
+padLeftImage.src = padLeft;
+
+const padRightImage = new Image();
+padRightImage.src = padRight;
+
+const padMidImage = new Image();
+padMidImage.src = padMid;
 
 const CMD_INSTALL_PLAYER = 1n;
 const CMD_BET_AND_HOLD = 2n;
@@ -21,22 +37,26 @@ const CMD_WITHDRAW = 5n;
 const CMD_DEPOSIT = 6n;
 
 export function Main() {
-  const uiState = useAppSelector(selectUIState);
+  const connectState = useAppSelector(selectConnectState);
   const l2account = useAppSelector(AccountSlice.selectL2Account);
   const userState = useAppSelector(selectUserState);
-  const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch();
   const [inc, setInc] = useState(0);
 
   function updateState() {
-    if (uiState == UIState.Idle) {
-      dispatch(queryState(l2account!.address));
+    if (connectState == ConnectState.Idle) {
+      dispatch(queryState(l2account!.getPrivateKey()));
+    } else if (connectState == ConnectState.Init) {
+      dispatch(queryInitialState("1"));
     }
     setInc(inc + 1);
   }
- 
+
   useEffect(() => {
-    if (l2account && uiState == UIState.Init) {
-      dispatch(queryState(l2account!.address));
+    if (l2account && connectState == ConnectState.Init) {
+      dispatch(queryState(l2account!.getPrivateKey()));
+    } else {
+      dispatch(queryInitialState("1"));
     }
   }, [l2account]);
 
@@ -48,20 +68,20 @@ export function Main() {
 
 
   useEffect(() => {
-    if (uiState == UIState.InstallPlayer) {
+    if (connectState == ConnectState.InstallPlayer) {
       const command = createCommand(0n, CMD_INSTALL_PLAYER, []);
       dispatch(sendTransaction({
         cmd: command,
-        prikey: l2account!.address
+        prikey: l2account!.getPrivateKey()
       }));
     }
-  }, [uiState]);
+  }, [connectState]);
 
   function place() {
       const command = createCommand(0n, CMD_BET_AND_HOLD, [100n]);
       dispatch(sendTransaction({
         cmd: command,
-        prikey: l2account!.address
+        prikey: l2account!.getPrivateKey()
       }));
   }
 
@@ -69,37 +89,118 @@ export function Main() {
       const command = createCommand(0n, CMD_CHECKOUT, []);
       dispatch(sendTransaction({
         cmd: command,
-        prikey: l2account!.address
+        prikey: l2account!.getPrivateKey()
       }));
+  }
+
+  function inPreparation(): boolean {
+      if (userState?.state?.prepare != undefined) {
+          return (userState?.state.prepare > 0);
+      } else {
+          return false;
+      }
+
+  }
+
+  function notBet(): boolean {
+      if (userState?.player != undefined) {
+          return (userState?.player.data.lastBetRound <= userState?.state.currentRound);
+      } else {
+          return false;
+      }
+  }
+
+  function bet(): boolean {
+      if (userState?.player != undefined) {
+          return ((userState?.player.data.lastBetRound > userState?.state.currentRound && inPreparation())
+              || (userState?.player.data.lastBetRound == userState?.state.currentRound && !inPreparation()))
+      } else {
+          return false;
+      }
   }
 
   return (
     <>
       <Nav/>
-      <p>
-      {uiState}
-      </p>
-      <div>
-      <li>player nonce: {userState?.player?.nonce}</li>
-      <li>player balance: {userState?.player?.data.balance}</li>
-      <li>player lastBet: {userState?.player?.data.lastBet}</li>
-      <li>player lastBetRound: {userState?.player?.data.lastBetRound}</li>
-      <li>current round: {userState?.state?.currentRound}</li>
-      <li>current ratio: {userState?.state?.ratio}</li>
-      <li>prepare: {userState?.state?.prepare}</li>
-      <li>counter: {userState?.state?.counter}</li>
+      <div id="right-panel">
+        <div className='stage'>
+        </div>
+
+        <SquareCanvas stage={stage}></SquareCanvas>
+
+
+        {userState?.state?.prepare == 0 &&
+          <div className='banner'>
+              <SpanButton className="automargin" padWidth={61} height={74} leftPadImage={padLeftImage.src} rightPadImage={padRightImage.src} midPadImage={padMidImage.src} midWidth={288}>
+                  <div className="automargin"> x {userState?.state?.ratio / 100}</div>
+              </SpanButton>
+          </div>
+
+        }
+        {userState?.state?.prepare != 0 && userState?.state?.ratio !=0 &&
+          <div className="banner">
+              <SpanButton className="automargin" padWidth={61} height={74} leftPadImage={padLeftImage.src} rightPadImage={padRightImage.src} midPadImage={padMidImage.src} midWidth={388}>
+                  <div className="automargin">round {userState?.state?.currentRound} start in {userState?.state?.prepare}s</div>
+          </SpanButton>
+          </div>
+        }
+        {userState?.state?.ratio ==0 &&
+          <div className="banner">
+            <SpanButton className="automargin" padWidth={61} height={74} leftPadImage={padLeftImage.src} rightPadImage={padRightImage.src} midPadImage={padMidImage.src} midWidth={288}>
+              <div className="automargin">round {userState?.state?.currentRound} bursted</div>
+            </SpanButton>
+          </div>
+        }
+
+        <div className="control">
+        </div>
+        {userState?.state?.ratio == 0 &&
+          <div className='explode'>
+          </div>
+        }
+        {userState?.player &&
+        <div className="fade-in">
+          <div className='avator'>
+          </div>
+        </div>
+        }
+
+        {userState?.player &&
+          <BetHistory></BetHistory>
+        }
+        <Overview></Overview>
+
+
       </div>
 
-      <Button onClick={place}>place</Button>
-      <Button onClick={checkout}>checkout</Button>
+      {userState?.player &&
+      <div className="fade-in">
+      <div className='balance'>Balance: {userState?.player?.data.balance}</div>
+      </div>
+      }
+      {notBet() && inPreparation() &&
+      <div onClick = {place} className="hold-btn">
+      join and hold
+      </div>
+      }
+      {bet() &&
+      <div className="hold-btn">
+          {!inPreparation() &&
+              <div onClick = {checkout}> release your {userState?.player?.data.lastBet} bet  </div>
+          }
+          {inPreparation() &&
+              <div onClick = {checkout}> you have placed {userState?.player?.data.lastBet} </div>
+          }
+      </div>
+      }
+      {!bet() && !inPreparation() &&
+      <div className="hold-btn"> being an audience ... </div>
+      }
 
-      <div>{userState?.state?.players?.length} players has entered the arena </div>
-      <>
-      {userState?.state?.players.map((x:any) => 
-        <div>{x.pid}</div>
-      )}
-      </>
-
+      <ChatHistoryInput></ChatHistoryInput>
+      {userState?.state &&
+      <Event></Event>
+            }
     </>
   );
 }

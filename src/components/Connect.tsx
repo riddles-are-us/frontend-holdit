@@ -37,7 +37,7 @@ export function LoginButton(props: IProps) {
 
   if (l1account) {
     if (l2account) {
-      const l2addresshex = "0x" + l2account.address;
+      const l2addresshex = "0x" + l2account.pubkey;
       return <span>ID: {addressAbbreviation(l2addresshex, 5)}</span>
     } else {
       return <MDBBtn onClick={login}>login apps</MDBBtn>
