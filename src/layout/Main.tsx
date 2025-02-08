@@ -22,6 +22,7 @@ import padMid from "../images/ratio/frame_middle.png";
 import {selectUIState} from "../data/ui";
 import {Menu} from "../components/Menu";
 import LeftPanel from "../components/LeftPanel";
+import {WithdrawModal} from "../components/Common";
 
 const padLeftImage = new Image();
 padLeftImage.src = padLeft;
@@ -35,8 +36,6 @@ padMidImage.src = padMid;
 const CMD_INSTALL_PLAYER = 1n;
 const CMD_BET_AND_HOLD = 2n;
 const CMD_CHECKOUT = 3n;
-const CMD_WITHDRAW = 5n;
-const CMD_DEPOSIT = 6n;
 
 export function Main() {
   const connectState = useAppSelector(selectConnectState);
@@ -163,17 +162,8 @@ export function Main() {
           <BetHistory lpanel={lpanel.current}></BetHistory>
         }
 
-        {lpanel.current &&
-          <Overview lpanel={lpanel.current}></Overview>
-        }
-
       </div>
 
-      {userState?.player &&
-      <div className="fade-in">
-          <div className='balance'>Balance: {userState?.player?.data.balance}</div>
-      </div>
-      }
       {notBet() && inPreparation() &&
       <div onClick = {place} className="hold-btn">
       join and hold
@@ -190,12 +180,17 @@ export function Main() {
       </div>
       }
       {!bet() && !inPreparation() &&
-      <div className="hold-btn"> being an audience ... </div>
+      <div className="hold-btn"> Audience Mode </div>
       }
       <LeftPanel ref = {lpanel}></LeftPanel>
 
+
       {lpanel.current &&
+        <>
         <ChatHistoryInput lpanel={lpanel.current}></ChatHistoryInput>
+        <WithdrawModal lpanel={lpanel.current} balanceOf={(a)=>a.data.balance} handleClose={()=>{return;}} handleResult={()=>{return;}} ></WithdrawModal>
+        <Overview lpanel={lpanel.current}></Overview>
+        </>
       }
       {userState?.state &&
       <Event></Event>
