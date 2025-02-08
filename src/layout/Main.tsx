@@ -1,9 +1,8 @@
 /* eslint-disable */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import 'mdb-react-ui-kit/dist/css/mdb.min.css';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./style.scss";
-import Nav from "../components/Nav";
 import { selectConnectState, selectUserState} from "../data/state";
 import { useAppSelector, useAppDispatch } from "../app/hooks";
 import { AccountSlice, ConnectState } from "zkwasm-minirollup-browser";
@@ -20,6 +19,9 @@ import {SpanButton} from "../components/Ratio";
 import padLeft from "../images/ratio/frame_left.png";
 import padRight from "../images/ratio/frame_right.png";
 import padMid from "../images/ratio/frame_middle.png";
+import {selectUIState} from "../data/ui";
+import {Menu} from "../components/Menu";
+import LeftPanel from "../components/LeftPanel";
 
 const padLeftImage = new Image();
 padLeftImage.src = padLeft;
@@ -40,8 +42,10 @@ export function Main() {
   const connectState = useAppSelector(selectConnectState);
   const l2account = useAppSelector(AccountSlice.selectL2Account);
   const userState = useAppSelector(selectUserState);
+  const uiState = useAppSelector(selectUIState);
   const dispatch = useAppDispatch();
   const [inc, setInc] = useState(0);
+  const lpanel = useRef<HTMLDivElement | null>(null);
 
   function updateState() {
     if (connectState == ConnectState.Idle) {
@@ -121,21 +125,17 @@ export function Main() {
 
   return (
     <>
-      <Nav/>
       <div id="right-panel">
         <div className='stage'>
         </div>
 
         <SquareCanvas stage={stage}></SquareCanvas>
-
-
         {userState?.state?.prepare == 0 &&
           <div className='banner'>
               <SpanButton className="automargin" padWidth={61} height={74} leftPadImage={padLeftImage.src} rightPadImage={padRightImage.src} midPadImage={padMidImage.src} midWidth={288}>
                   <div className="automargin"> x {userState?.state?.ratio / 100}</div>
               </SpanButton>
           </div>
-
         }
         {userState?.state?.prepare != 0 && userState?.state?.ratio !=0 &&
           <div className="banner">
@@ -158,24 +158,20 @@ export function Main() {
           <div className='explode'>
           </div>
         }
-        {userState?.player &&
-        <div className="fade-in">
-          <div className='avator'>
-          </div>
-        </div>
+        <Menu handleRestart={()=>{return}}></Menu>
+        {lpanel.current && userState?.player &&
+          <BetHistory lpanel={lpanel.current}></BetHistory>
         }
 
-        {userState?.player &&
-          <BetHistory></BetHistory>
+        {lpanel.current &&
+          <Overview lpanel={lpanel.current}></Overview>
         }
-        <Overview></Overview>
-
 
       </div>
 
       {userState?.player &&
       <div className="fade-in">
-      <div className='balance'>Balance: {userState?.player?.data.balance}</div>
+          <div className='balance'>Balance: {userState?.player?.data.balance}</div>
       </div>
       }
       {notBet() && inPreparation() &&
@@ -196,11 +192,14 @@ export function Main() {
       {!bet() && !inPreparation() &&
       <div className="hold-btn"> being an audience ... </div>
       }
+      <LeftPanel ref = {lpanel}></LeftPanel>
 
-      <ChatHistoryInput></ChatHistoryInput>
+      {lpanel.current &&
+        <ChatHistoryInput lpanel={lpanel.current}></ChatHistoryInput>
+      }
       {userState?.state &&
       <Event></Event>
-            }
+      }
     </>
   );
 }

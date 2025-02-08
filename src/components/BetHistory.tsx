@@ -1,13 +1,15 @@
 import React, {useEffect, useState} from 'react';
+import ReactDOM from 'react-dom';
 import {AccountSlice} from 'zkwasm-minirollup-browser';
 import {useAppDispatch, useAppSelector} from '../app/hooks';
 import {selectUserState} from '../data/state';
-import {selectHistory, getHistory} from '../data/ui';
+import {selectHistory, getHistory, selectUIState, ModalIndicator} from '../data/ui';
 
-export default function BetHistory() {
+export default function BetHistory(properties: {lpanel: HTMLDivElement}) {
   const l2account = useAppSelector(AccountSlice.selectL2Account);
   const history = useAppSelector(selectHistory);
   const userState = useAppSelector(selectUserState);
+  const uiState = useAppSelector(selectUIState);
   const dispatch = useAppDispatch();
   useEffect(() => {
     if (l2account) {
@@ -21,11 +23,12 @@ export default function BetHistory() {
     }
   }, [l2account]);
 
-
-  return (
-    <div className="history">
-      <table className="w-full border border-gray-200 shadow-md">
-        <thead>
+  function content() {
+    return (
+    <>
+      <h4>Your game history</h4>
+    <table className="w-full border border-gray-200 shadow-md mt-2">
+      <thead>
       <tr className="bg-gray-100 text-left">
         <th className="p-2 border">Round</th>
         <th className="p-2 border">Betting Amount</th>
@@ -42,6 +45,17 @@ export default function BetHistory() {
         ))}
         </tbody>
       </table>
-    </div>
+    </>
+    )
+  }
+
+  return (
+    <>
+      {uiState.modal == ModalIndicator.HISTORY &&
+      ReactDOM.createPortal(
+        content(),
+        properties.lpanel
+      )}
+    </>
   );
 }

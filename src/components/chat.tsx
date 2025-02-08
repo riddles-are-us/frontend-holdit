@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ReactDOM from "react-dom";
 import {selectL2Account} from 'zkwasm-minirollup-browser/src/reduxstate';
 import {useAppDispatch, useAppSelector} from '../app/hooks';
 import { sendExtrinsicTransaction } from "../request";
@@ -6,7 +7,8 @@ import BN from "bn.js";
 import {createAsyncThunk} from '@reduxjs/toolkit';
 import {rpc} from 'zkwasm-minirollup-browser';
 import {selectUserState} from '../data/state';
-
+import {LeHexBN} from 'zkwasm-minirollup-rpc';
+import {setUIState, selectUIState, ModalIndicator} from '../data/ui';
 
 // Function to convert a string to a Uint64Array
 function stringToUint64Array(input: string): BigUint64Array {
@@ -80,10 +82,24 @@ function bnStringToUint64Array(hex: string) {
   return u64hexarray.map((x) => littleEndianHexToBigint(x));
 }
 
-function decodeComments(dataArray: string[]) {
+interface CommentInfo {
+  msg: string;
+  pubkey: string;
+}
+
+function encodePID(pubkey: string) {
+  const pid = new LeHexBN(pubkey).toU64Array();
+  return (`0x${pid[1].toString(16)}${pid[2].toString(16)}`)
+}
+
+
+function decodeComments(dataArray: CommentInfo[]) {
   const msgs = dataArray.map((x) => {
-    const u64array = bnStringToUint64Array(x);
-    return uint64ArrayToString(new BigUint64Array(u64array))
+    const u64array = bnStringToUint64Array(x.msg);
+    return {
+      pubkey: x.pubkey,
+      msg: uint64ArrayToString(new BigUint64Array(u64array))
+    }
   });
   return msgs;
 }
@@ -102,25 +118,21 @@ export const getComments = createAsyncThunk(
 
 
 
-const ChatHistoryInput = () => {
-  const [history, setHistory] = useState<string[]>([]);
-  const [isFocused, setIsFocused] = useState(false);
+const ChatHistoryInput = (properties: {lpanel: HTMLDivElement}) => {
+  const [history, setHistory] = useState<CommentInfo[]>([]);
   const [inputValue, setInputValue] = useState("");
   const userState = useAppSelector(selectUserState);
+  const uiState = useAppSelector(selectUIState);
 
   const dispatch = useAppDispatch();
   const l2account = useAppSelector(selectL2Account);
 
   function sendComment(message: string) {
-          setIsFocused(true);
           dispatch(sendExtrinsicTransaction({cmd: stringToUint64Array(message), prikey: l2account!.getPrivateKey()}))
           .then((action) => {
               if (sendExtrinsicTransaction.fulfilled.match(action)) {
-                  const dataArray: string[] = action.payload.data;
-                  const msgs = dataArray.map((x) => {
-                    const u64array = bnStringToUint64Array(x);
-                    return uint64ArrayToString(new BigUint64Array(u64array))
-                  });
+                  const dataArray: CommentInfo[] = action.payload.data;
+                  const msgs = decodeComments(dataArray);
                   setHistory(msgs);
               }
           });
@@ -131,49 +143,56 @@ const ChatHistoryInput = () => {
           dispatch(getComments(l2account!.getPrivateKey()))
           .then((action) => {
               if (getComments.fulfilled.match(action)) {
-                  const msgs: string[] = action.payload;
+                  const msgs: CommentInfo[] = action.payload;
                   setHistory(msgs);
               }
           });
-          setInputValue("");
   }
 
 
-  function onSubmit(){
-    sendComment(inputValue);
+  function onSubmit() {
+    if(userState?.player) {
+      sendComment(inputValue);
+    }
   }
+
 
   useEffect(() => {
-    if(isFocused) {
+    if(uiState.modal == ModalIndicator.CHAT && userState?.player) {
       queryComment();
     }
   }, [userState]);
 
+  function switchToChatPanel() {
+    dispatch(setUIState({modal: ModalIndicator.CHAT}));
+  }
+
   return (
-    <div id="chat-history">
-      {isFocused && (
-              <div style={{textAlign: "left", background: '#f8f8f8', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
-          <strong>Chat History:</strong>
+    <div className="input-field">
+       {uiState.modal == ModalIndicator.CHAT &&
+       ReactDOM.createPortal(
+       (<div className="comment-field">
+          <h4>Live Chat:</h4>
           <ul style={{ listStyleType: 'none', padding: 0 }}>
             {history.map((item, index) => (
-              <li key={index} style={{ margin: '5px 0' }}>{item}</li>
+               <li key={index} style={{ margin: '5px 0' }}>{encodePID(item.pubkey)}: {item.msg}</li>
             ))}
           </ul>
         </div>
+      ),
+      properties.lpanel
       )}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
       <input
         id = "comment-message"
         type="text"
         value={inputValue}
         placeholder="Say something..."
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        style={{ padding: '10px', width: '100%', fontSize: '16px' }}
+        onFocus={() => switchToChatPanel()}
+        //onBlur={() => setIsFocused(false)}
         onChange = {(e) => setInputValue(e.target.value)}
       />
-      <button onClick={onSubmit} style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}>Submit</button>
-      </div>
+      <button onClick={onSubmit} style={{fontSize: '16px', cursor: 'pointer' }}></button>
     </div>
   );
 };

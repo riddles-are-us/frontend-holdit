@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {RequestError, rpc} from 'zkwasm-minirollup-browser';
 import {LeHexBN, query} from 'zkwasm-minirollup-rpc';
 import {RootState} from '../app/store';
@@ -57,6 +57,18 @@ export interface RequestError {
 }
 */
 
+export enum ModalIndicator {
+  WITHDRAW,
+  DEPOSIT,
+  HISTORY,
+  OVERVIEW,
+  CHAT,
+}
+
+interface UIState {
+  modal: null | ModalIndicator;
+}
+
 interface HistoryState {
   round: number,
   bet: number,
@@ -65,18 +77,28 @@ interface HistoryState {
 
 export interface PropertiesState {
     history: HistoryState[];
+    uiState: UIState;
     lastError: RequestError | null,
 }
 
 const initialState: PropertiesState = {
   history: [],
   lastError: null,
+  uiState: {
+    modal: null,
+  }
+
 }
 
 const historySlice = createSlice({
   name: 'properties',
   initialState,
-  reducers: {},
+  reducers: {
+    setUIState: (state, d: PayloadAction<UIState>) => {
+      state.uiState = d.payload;
+    },
+
+  },
 
   extraReducers: (builder) => {
     builder
@@ -93,4 +115,6 @@ const historySlice = createSlice({
 });
 
 export const selectHistory = (state: RootState) => state.history.history;
+export const selectUIState = (state: RootState) => state.history.uiState;
+export const { setUIState } = historySlice.actions;
 export default historySlice.reducer;

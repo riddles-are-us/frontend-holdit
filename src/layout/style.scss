@@ -33,12 +33,10 @@
 
 #right-panel {
   position: absolute;
-  top: 60px;
+  top: 0px;
   bottom: 0px;
   right: 0px;
   left: 000px;
-  min-width: 600px;
-
 }
 
 div.stage {
@@ -101,13 +99,44 @@ div.boss {
 div.avator {
   background:url("../images/avator/avator-01.jpg") no-repeat center center;
   position: absolute;
-  top: 10px;
-  left: 10px;
-  height: 200px;
-  width: 200px;
+  top: 90px;
+  left: 20px;
+  height: 120px;
+  width: 120px;
   border: 1px solid gray;
   background-size: auto 100%;
 }
+
+div.history-btn {
+  background:url("../images/buttons/history.png") no-repeat center center;
+  position: absolute;
+  top: 250px;
+  left: 20px;
+  height: 100px;
+  width: 100px;
+  background-size: auto 100%;
+}
+
+div.withdraw-btn {
+  background:url("../images/buttons/overview.png") no-repeat center center;
+  position: absolute;
+  top: 360px;
+  left: 20px;
+  height: 100px;
+  width: 100px;
+  background-size: auto 100%;
+}
+
+div.deposit-btn {
+  background:url("../images/buttons/deposit.png") no-repeat center center;
+  position: absolute;
+  top: 470px;
+  left: 20px;
+  height: 100px;
+  width: 100px;
+  background-size: auto 100%;
+}
+
 
 div.history {
   position: absolute;
@@ -135,7 +164,7 @@ div.control {
 
 div.hold-btn {
   position: absolute;
-  left: 50%; 
+  left: 50%;
   bottom: 15%;
   width: 300px;
   font-size: 30px;
@@ -172,10 +201,9 @@ div.prepare {
 
 div.balance {
   position: absolute;
-  bottom: 12%;
-  width: 150px;
-  left: 50%; 
-  transform: translate(-75px, 0);
+  top: 210px;
+  width: 120px;
+  left: 20px;
   background-color: black;
   text-align: center;
   font-size: 15px;
@@ -196,25 +224,17 @@ div.round {
 
 div.round-overview {
   position: absolute;
-  top: 26%;
-  left: 50%;
+  bottom: 90px;
+  left: 25px;
   width: 400px;
   text-align: center;
   font-size: 14px;
   color: black;
-  transform: translate(-200px, 0);
   background-color: white;
   border: 1px solid gray;
   table {
     margin: auto;
     display: None;
-  }
-}
-
-div.round-overview:hover {
-  table {
-    margin: auto;
-    display: inline-block;
   }
 }
 
@@ -242,15 +262,105 @@ div.canvas-container {
   left: 0px;
 }
 
+div.historyShow {
+  background: #a5a5a5;
+  display: block;
+  width: 532px;
+}
+
+div.Show {
+  display: block;
+  left: 498px;
+}
+
+div.Hide {
+  display: block;
+  left: -100px;
+}
+
 #chat-history {
   position: absolute;
-  bottom: 20px;
-  left: 20%;
-  width: 60%;
+  bottom: 0px;
+  left: 0px;
+  top: 0px;
   text-align: center;
   font-size: 14px;
-  border: 1px solid gray;
+
+  div.comment-field {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    bottom: 100px;
+    text-align: left;
+    padding: 10px;
+  }
+
+  div.vertical-span-button {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    text-align: left;
+    width: 53px;
+  }
+
+  div.cancel-btn {
+    position: absolute;
+    top: 40%;
+    width: 53px;
+    height: 163px;
+    background-image: url("../images/ratio/chat_button.png");
+    background-size: cover;
+  }
+
+  h4 {
+    margin: 10px;
+    color: #fff;
+  }
+
+  ul {
+    margin-left: 10px;
+    li {
+       padding: 5px;
+       font-size: 16px;
+       color: #fff;
+    }
+  }
 }
+
+div.input-field {
+  left: 25px;
+  display: flex;
+  justifyContent: center;
+  alignItems: center;
+  position: absolute;
+  bottom: 20px;
+
+  #comment-message {
+    padding: 0px 0px 0px 5px;
+    margin: 0px;
+    width: 400px;
+    height: 48px;
+    background-color: #858585 !important;
+    border: 1px solid #333333;
+  }
+
+
+
+  button {
+    padding: 0px;
+    margin: 0px 0px 0px 10px;
+    height: 50px;
+    border: 0px;
+    width: 50px;
+    background-image: url("../images/send.png");
+    background-size: cover;
+    background-color: transparent;
+  }
+
+
+}
+
 
 @keyframes fadeIn {
   from {

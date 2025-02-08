@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { SpiriteInfo, ClipRect, Clip, Stage, PositionInfo } from "../animation/clip";
 
 import explodeSrc from "../images/explode.png";
-import backgroundSrc from "../images/arena.jpg";
+import backgroundSrc from "../images/arena.png";
 
 const explodeImage = new Image();
 explodeImage.src = explodeSrc;
