@@ -22,7 +22,9 @@ import padMid from "../images/ratio/frame_middle.png";
 import {selectUIState} from "../data/ui";
 import {Menu} from "../components/Menu";
 import LeftPanel from "../components/LeftPanel";
-import {WithdrawModal} from "../components/Common";
+import { WithdrawModal } from "tx-modal-kit";
+import { ModalIndicator } from "../data/ui";
+import {createWithdrawCommand} from "zkwasm-minirollup-rpc";
 
 const padLeftImage = new Image();
 padLeftImage.src = padLeft;
@@ -36,10 +38,12 @@ padMidImage.src = padMid;
 const CMD_INSTALL_PLAYER = 1n;
 const CMD_BET_AND_HOLD = 2n;
 const CMD_CHECKOUT = 3n;
+const CMD_WITHDRAW = 5n;
 
 export function Main() {
   const connectState = useAppSelector(selectConnectState);
   const l2account = useAppSelector(AccountSlice.selectL2Account);
+  const l1account = useAppSelector(AccountSlice.selectL1Account);
   const userState = useAppSelector(selectUserState);
   const uiState = useAppSelector(selectUIState);
   const dispatch = useAppDispatch();
@@ -122,6 +126,105 @@ export function Main() {
       }
   }
 
+  const useTransactionModal = () => {
+    const [show, setShow] = useState(false);
+
+    useEffect(() => {
+      if (uiState.modal === ModalIndicator.WITHDRAW || uiState.modal === ModalIndicator.DEPOSIT) {
+        setShow(true);
+      } else {
+        setShow(false);
+      }
+    }, [uiState.modal]);
+
+    return show;
+  };
+
+  const showTransactionModal = useTransactionModal();
+
+  function getWithdrawTransactionCommandArray(
+    nonce: bigint,
+    amount: bigint,
+    account: AccountSlice.L1AccountInfo
+  ): BigUint64Array {
+    const address = account!.address.slice(2);
+    const command = createWithdrawCommand(
+      nonce,
+      CMD_WITHDRAW,
+      address,
+      0n,
+      amount
+    );
+    return command;
+  }
+
+  const withdraw = async (amount: number) => {
+    if(!l1account) {
+      throw new Error("You have not yet obtained a mainchain account (Layer 1 account).");
+    }
+
+    if(!l2account) {
+      throw new Error("You have not yet obtained a sidechain account (Layer 2 account).");
+    }
+
+    const action = await dispatch(
+      sendTransaction({
+        cmd: getWithdrawTransactionCommandArray(
+          BigInt(userState?.player?.nonce || 0),
+          BigInt(amount),
+          l1account!
+        ),
+        prikey: l2account!.getPrivateKey(),
+      })
+    )
+
+    if (sendTransaction.fulfilled.match(action)) {
+      const current_balance = action.payload.player.data.balance;
+      //setShowResult(true);
+      //setInfoMessage("Withdraw Success: current balance is " +  current_balance);
+      //closeModal();
+    } else if(sendTransaction.rejected.match(action)) {
+      throw Error("Withdraw Error: " +  action.payload);
+    }
+  };
+
+  const deposit = async (amount: string) => {
+    try {
+      if(!l1account) {
+        throw new Error("You have not yet obtained a mainchain account (Layer 1 account).");
+      }
+
+      if(!l2account) {
+        throw new Error("You have not yet obtained a sidechain account (Layer 2 account).");
+      }
+
+      const action = await dispatch(
+        AccountSlice.depositAsync({
+          tokenIndex: 0,
+          amount: Number(BigInt(amount)),
+          l2account: l2account!,
+          l1account: l1account!,
+        })
+      );
+
+      if (AccountSlice.depositAsync.fulfilled.match(action)) {
+        //'setInfoMessage("Deposit Success: " +  action.payload!.hash);
+        //setShowResult(true);
+        //closeModal();
+      } else if (AccountSlice.depositAsync.rejected.match(action)) {
+        if (action.error.message == null) {
+          throw new Error("Deposit Failed: Unknown Error");
+        } else if (action.error.message.startsWith("user rejected action")) {
+          throw new Error("Deposit Failed: User rejected action");
+        } else {
+          throw new Error("Deposit Failed: " + action.error.message);
+        }
+      }
+    } catch (error: any) {
+      throw new Error("Deposit1 Failed: " + error);
+    }
+  };
+
   return (
     <>
       <div id="right-panel">
@@ -187,9 +290,17 @@ export function Main() {
 
       {lpanel.current &&
         <>
-        <ChatHistoryInput lpanel={lpanel.current}></ChatHistoryInput>
-        <WithdrawModal lpanel={lpanel.current} balanceOf={(a)=>a.data.balance} handleClose={()=>{return;}} handleResult={()=>{return;}} ></WithdrawModal>
-        <Overview lpanel={lpanel.current}></Overview>
+          <ChatHistoryInput lpanel={lpanel.current}></ChatHistoryInput>
+          <WithdrawModal
+            withdraw={withdraw}
+            deposit={deposit}
+            show={showTransactionModal}
+            lpanel={lpanel.current}
+            uiStateModal={uiState.modal}
+            ModalIndicator={ModalIndicator}
+            balance={userState?.player?.data.balance || 0}
+          />
+          <Overview lpanel={lpanel.current}></Overview>
         </>
       }
       {userState?.state &&
