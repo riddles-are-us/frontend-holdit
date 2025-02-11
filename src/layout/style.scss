@@ -117,8 +117,18 @@ div.history-btn {
   background-size: auto 100%;
 }
 
+div.guide-btn {
+  background:url("../images/buttons/guide.png") no-repeat center center;
+  position: absolute;
+  top: 360px;
+  left: 20px;
+  height: 100px;
+  width: 100px;
+  background-size: auto 100%;
+}
+
 div.withdraw-btn {
-  background:url("../images/buttons/overview.png") no-repeat center center;
+  background:url("../images/buttons/withdraw.png") no-repeat center center;
   position: absolute;
   top: 360px;
   left: 20px;
@@ -160,6 +170,43 @@ div.control {
   bottom: 0px;
   right: 0px;
   left: 0px;
+}
+
+div.audience-mode {
+  background:url("../images/audience-mode.png") no-repeat center center;
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  width: 240px;
+  height: 62px;
+  padding-top: 15px;
+  padding-left: 25px;
+  font-size: 20px;
+  transform: translate(-150px, 0);
+  text-align: center;
+  color: white;
+}
+
+div.bet-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  width: 300px;
+  font-size: 18px;
+  transform: translate(-150px, 0);
+  border: 1px solid black;
+  text-align: center;
+  color: white;
+  background-color: black;
+
+  #place-bet {
+    padding: 0px 0px 0px 5px;
+    margin: 0px;
+    height: 48px;
+    background-color: #858585 !important;
+    border: 1px solid #333333;
+    width: 100%;  
+  }
 }
 
 div.hold-btn {

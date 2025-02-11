@@ -23,6 +23,7 @@ import {selectUIState} from "../data/ui";
 import {Menu} from "../components/Menu";
 import LeftPanel from "../components/LeftPanel";
 import {WithdrawModal} from "../components/Common";
+import BetButton from "../components/Bet";
 
 const padLeftImage = new Image();
 padLeftImage.src = padLeft;
@@ -34,8 +35,6 @@ const padMidImage = new Image();
 padMidImage.src = padMid;
 
 const CMD_INSTALL_PLAYER = 1n;
-const CMD_BET_AND_HOLD = 2n;
-const CMD_CHECKOUT = 3n;
 
 export function Main() {
   const connectState = useAppSelector(selectConnectState);
@@ -80,47 +79,6 @@ export function Main() {
     }
   }, [connectState]);
 
-  function place() {
-      const command = createCommand(0n, CMD_BET_AND_HOLD, [100n]);
-      dispatch(sendTransaction({
-        cmd: command,
-        prikey: l2account!.getPrivateKey()
-      }));
-  }
-
-  function checkout() {
-      const command = createCommand(0n, CMD_CHECKOUT, []);
-      dispatch(sendTransaction({
-        cmd: command,
-        prikey: l2account!.getPrivateKey()
-      }));
-  }
-
-  function inPreparation(): boolean {
-      if (userState?.state?.prepare != undefined) {
-          return (userState?.state.prepare > 0);
-      } else {
-          return false;
-      }
-
-  }
-
-  function notBet(): boolean {
-      if (userState?.player != undefined) {
-          return (userState?.player.data.lastBetRound <= userState?.state.currentRound);
-      } else {
-          return false;
-      }
-  }
-
-  function bet(): boolean {
-      if (userState?.player != undefined) {
-          return ((userState?.player.data.lastBetRound > userState?.state.currentRound && inPreparation())
-              || (userState?.player.data.lastBetRound == userState?.state.currentRound && !inPreparation()))
-      } else {
-          return false;
-      }
-  }
 
   return (
     <>
@@ -164,31 +122,14 @@ export function Main() {
 
       </div>
 
-      {notBet() && inPreparation() &&
-      <div onClick = {place} className="hold-btn">
-      join and hold
-      </div>
-      }
-      {bet() &&
-      <div className="hold-btn">
-          {!inPreparation() &&
-              <div onClick = {checkout}> release your {userState?.player?.data.lastBet} bet  </div>
-          }
-          {inPreparation() &&
-              <div onClick = {checkout}> you have placed {userState?.player?.data.lastBet} </div>
-          }
-      </div>
-      }
-      {!bet() && !inPreparation() &&
-      <div className="hold-btn"> Audience Mode </div>
-      }
       <LeftPanel ref = {lpanel}></LeftPanel>
+      <BetButton></BetButton>
 
 
       {lpanel.current &&
         <>
         <ChatHistoryInput lpanel={lpanel.current}></ChatHistoryInput>
-        <WithdrawModal lpanel={lpanel.current} balanceOf={(a)=>a.data.balance} handleClose={()=>{return;}} handleResult={()=>{return;}} ></WithdrawModal>
+        <WithdrawModal lpanel={lpanel.current} balanceOf={(a)=>a.data.balance} handleClose={()=>{return;}} ></WithdrawModal>
         <Overview lpanel={lpanel.current}></Overview>
         </>
       }

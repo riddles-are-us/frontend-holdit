@@ -101,7 +101,7 @@ function decodeComments(dataArray: CommentInfo[]) {
       msg: uint64ArrayToString(new BigUint64Array(u64array))
     }
   });
-  return msgs;
+  return msgs
 }
 
 export const getComments = createAsyncThunk(

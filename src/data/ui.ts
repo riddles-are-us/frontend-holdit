@@ -63,6 +63,7 @@ export enum ModalIndicator {
   HISTORY,
   OVERVIEW,
   CHAT,
+  RESPONSE,
 }
 
 interface UIState {
@@ -79,15 +80,16 @@ export interface PropertiesState {
     history: HistoryState[];
     uiState: UIState;
     lastError: RequestError | null,
+    lastResponse: string | null,
 }
 
 const initialState: PropertiesState = {
   history: [],
   lastError: null,
+  lastResponse: null,
   uiState: {
     modal: null,
   }
-
 }
 
 const historySlice = createSlice({
@@ -96,6 +98,9 @@ const historySlice = createSlice({
   reducers: {
     setUIState: (state, d: PayloadAction<UIState>) => {
       state.uiState = d.payload;
+    },
+    setUIResponse: (state, d: PayloadAction<string>) => {
+      state.lastResponse = d.payload;
     },
 
   },
@@ -116,5 +121,6 @@ const historySlice = createSlice({
 
 export const selectHistory = (state: RootState) => state.history.history;
 export const selectUIState = (state: RootState) => state.history.uiState;
-export const { setUIState } = historySlice.actions;
+export const selectUIResponse = (state: RootState) => state.history.lastResponse;
+export const { setUIState, setUIResponse } = historySlice.actions;
 export default historySlice.reducer;

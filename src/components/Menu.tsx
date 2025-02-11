@@ -36,6 +36,9 @@ export function Menu(props: IProps) {
     dispatch(setUIState({modal: ModalIndicator.WITHDRAW}))
   }
 
+  function switchDepositPanel() {
+    dispatch(setUIState({modal: ModalIndicator.DEPOSIT}))
+  }
 
   return (
     <div className="fade-in">
@@ -43,11 +46,11 @@ export function Menu(props: IProps) {
       </div>
       <div className='balance'>Balance: {userState?.player?.data.balance}</div>
 
-      <div className='deposit-btn'>
-      </div>
       <div className='withdraw-btn' onClick={()=> switchWithdrawPanel()}>
       </div>
       <div className='history-btn' onClick={()=> switchHistoryPanel()}>
+      </div>
+      <div className='deposit-btn' onClick={()=> switchDepositPanel()}>
       </div>
    </div>
   )
