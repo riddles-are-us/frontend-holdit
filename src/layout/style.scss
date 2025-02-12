@@ -50,17 +50,26 @@ div.stage {
 }
 
 div.automargin {
-  margin: auto
+  margin: auto;
+  div.left20 {
+    position: relative;
+    left: -20px;
+  }
 }
 
 div.banner {
   position: absolute;
-  top:-10px;
+  top: 0px;
   left: 0px;
   right: 0px;
   text-align: center;
   font-size: 35px;
   color: white;
+  img {
+     height: 70px;
+     display: inline;
+  }
+
 
 }
 
@@ -209,17 +218,42 @@ div.bet-btn {
   }
 }
 
-div.hold-btn {
+div.hold-btn-checkout {
+  background:url("../images/checkout.png") no-repeat center center;
+  background-size: auto 100%;
   position: absolute;
   left: 50%;
   bottom: 15%;
   width: 300px;
+  height: 187px;
   font-size: 30px;
   transform: translate(-150px, 0);
-  border: 1px solid black;
+  text-align: center;
+  padding-top: 40px;
+  color: white;
+  .button {
+    width: 100px;
+    background-color: white;
+  }
+}
+
+div.hold-btn-wait {
+  background:url("../images/hold.png") no-repeat center center;
+  background-size: auto 100%;
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  padding-top: 40px;
+  width: 300px;
+  height: 187px;
+  font-size: 30px;
+  transform: translate(-150px, 0);
   text-align: center;
   color: white;
-  background-color: black;
+  .button {
+    width: 100px;
+    background-color: white;
+  }
 }
 
 div.ratio {

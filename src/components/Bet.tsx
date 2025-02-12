@@ -70,15 +70,17 @@ const BetButton = () => {
          <div onClick = {place}> join and hold</div>
       </div>
       }
-      {bet() &&
-      <div className="hold-btn">
-          {!inPreparation() &&
-              <div onClick = {checkout}> release your {userState?.player?.data.lastBet} bet  </div>
-          }
-          {inPreparation() &&
-              <div onClick = {checkout}> you have placed {userState?.player?.data.lastBet} </div>
-          }
-      </div>
+      {bet() && !inPreparation() &&
+         <div className="hold-btn-checkout" onClick={checkout}>
+              <div className="number">{userState!.player!.data.lastBet * userState!.state!.ratio / 100}</div>
+              <div className="button" onClick = {checkout}> </div>
+         </div>
+      }
+      {bet() && inPreparation() &&
+         <div className="hold-btn-wait">
+              <div className="number">{userState?.player?.data.lastBet}</div>
+              <div className="button"> </div>
+         </div>
       }
       {!bet() && !inPreparation() &&
       <div className="audience-mode"> Audience Mode </div>

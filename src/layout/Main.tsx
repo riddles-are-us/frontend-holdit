@@ -24,6 +24,7 @@ import {Menu} from "../components/Menu";
 import LeftPanel from "../components/LeftPanel";
 import {WithdrawModal} from "../components/Common";
 import BetButton from "../components/Bet";
+import MultiplyImage from "../images/multiply.png";
 
 const padLeftImage = new Image();
 padLeftImage.src = padLeft;
@@ -90,7 +91,12 @@ export function Main() {
         {userState?.state?.prepare == 0 &&
           <div className='banner'>
               <SpanButton className="automargin" padWidth={61} height={74} leftPadImage={padLeftImage.src} rightPadImage={padRightImage.src} midPadImage={padMidImage.src} midWidth={288}>
-                  <div className="automargin"> x {userState?.state?.ratio / 100}</div>
+                      <div className="automargin">
+                        <div className="left20">
+                          <img src={MultiplyImage}/>
+                          <span>{userState?.state?.ratio / 100}</span>
+                        </div>
+                      </div>
               </SpanButton>
           </div>
         }
@@ -122,8 +128,8 @@ export function Main() {
 
       </div>
 
-      <LeftPanel ref = {lpanel}></LeftPanel>
       <BetButton></BetButton>
+      <LeftPanel ref = {lpanel}></LeftPanel>
 
 
       {lpanel.current &&

@@ -37,6 +37,7 @@ export default function Event() {
         stage.getClip("boss")!.stop();
     }
     if (userState!.state!.prepare == 0 && userState!.state!.ratio > state.ratio) {
+        stage.getClip("boss")!.switchAnimationClip("boss");
         stage.getClip("boss")!.playRange(0, 25, (clip) => {clip.show(); return;});
     }
     setState(userState!.state);
