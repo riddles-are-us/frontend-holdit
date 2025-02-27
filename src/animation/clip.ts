@@ -33,7 +33,11 @@ export interface PositionInfo {
   left: number;
 }
 
-
+export interface Target {
+  top: number;
+  left: number;
+  handler: (clip: Clip) => void;
+}
 
 export class Clip {
   name: string;
@@ -45,17 +49,17 @@ export class Clip {
   clips: Map<string, SpiriteInfo>;
   currentFrame: number | null;
   currentClip: string | null;
-  parentRatio: PositionInfo;
+  stage: Stage;
   focus: boolean;
   hover: boolean;
   halted: boolean;
-  target: Array<[number, number]>;
+  target: Array<Target>;
   active: boolean;
   stopFrame: number | null;
   zIndex: number;
   stopCallback: (c: Clip) => void;
 
-  constructor(name: string, boundry: ClipRect, parentRatio: PositionInfo, zIndex: number) {
+  constructor(name: string, boundry: ClipRect, zIndex: number, stage: Stage) {
     this.name = name;
     this.boundry = boundry;
     this.vx = 0;
@@ -65,7 +69,7 @@ export class Clip {
     this.currentFrame = null;
     this.currentClip = null;
     this.clips = new Map<string, SpiriteInfo>();
-    this.parentRatio = parentRatio;
+    this.stage = stage;
     this.focus = false;
     this.hover = false;
     this.target = [];
@@ -100,9 +104,10 @@ export class Clip {
   inRect(cursorLeft: number, cursorTop: number): boolean {
     const rect = this.getCurrentRect();
     const w = rect.right-rect.left;
-    const bottom = this.top + w * this.parentRatio.ratio + this.parentRatio.top;
-    const right = this.left + w * this.parentRatio.ratio + this.parentRatio.left;
-    const margin = w * this.parentRatio.ratio / 4;
+    const r = this.stage.ratio;
+    const bottom = this.top + w * r.ratio + r.top;
+    const right = this.left + w * r.ratio + r.left;
+    const margin = w * r.ratio / 4;
     if (cursorLeft > this.left + margin
       && cursorLeft < right - margin
       && cursorTop > this.top + margin
@@ -134,7 +139,8 @@ export class Clip {
     if (this.currentClip != null && this.currentFrame != null) {
       const rect = this.getCurrentRect();
       const w = rect.right-rect.left;
-      return [this.left + this.parentRatio.ratio * w/2, this.top + this.parentRatio.ratio*w]
+      const r = this.stage.ratio;
+      return [this.left + r.ratio * w/2, this.top + r.ratio*w]
     }
     else {
       return null;
@@ -146,16 +152,12 @@ export class Clip {
   }
 
 
-  setSpeed(ratio: number) {
-    const rx = 2 * Math.random() - 1;
-    const ry = Math.sign(rx) * Math.sqrt(1 - rx*rx);
-    if (this.target.length == 0) {
-      this.vx = rx * ratio;
-      this.vy = ry * ratio;
-    } else {
+  setSpeed() {
+    const ratio = this.stage.ratio.ratio;
+    if (this.target.length != 0) {
       const len = this.target.length - 1;
-      let rx = this.target[len][0] - this.left;
-      let ry = this.target[len][1] - this.top;
+      let rx = this.target[len].left - this.left;
+      let ry = this.target[len].top - this.top;
       if (Math.abs(rx) > 10) {
         rx = Math.sign(rx) * 10;
       }
@@ -165,7 +167,11 @@ export class Clip {
       this.vx = rx;
       this.vy = ry;
       if (rx*rx + ry*ry < 5) {
-        //this.target.pop();
+        const target = this.target.pop();
+        if (this.target.length == 0) {
+          target.handler(this);
+          //this.stage.emitEvent(this, "ReachTarget");
+        }
       }
     }
   }
@@ -183,14 +189,14 @@ export class Clip {
 
   draw(ctx: CanvasRenderingContext2D) {
     if (this.currentClip != null && this.currentFrame != null && this.active == true) {
-      //Set the fill color
+      const ratio = this.stage.ratio;
       const rect = this.getCurrentRect();
-      const w = rect.right-rect.left;
+      const w = rect.right - rect.left;
       const h = rect.bottom - rect.top;
       const src = this.getCurrentImage();
-      const left = this.left + this.parentRatio.left;
-      const top = this.left + this.parentRatio.top;
-      ctx.drawImage(src, rect.left, rect.top, w, h, left, top, w * this.parentRatio.ratio, h * this.parentRatio.ratio);
+      const left = this.left * ratio.ratio + ratio.left;
+      const top = this.top * ratio.ratio + ratio.top;
+      ctx.drawImage(src, rect.left, rect.top, w, h, left, top, w * ratio.ratio, h * ratio.ratio);
 
       if (this.focus == true) {
         ctx.fillStyle = "orange";  // Red color
@@ -235,6 +241,7 @@ export class Clip {
       this.currentFrame = (this.currentFrame + 1) % len;
       this.top = this.vy + this.top;
       this.left = this.vx + this.left;
+      this.setSpeed();
       if (this.target.length == 0) {
         if (this.top < this.boundry.top) {
           this.top = this.boundry.top;
@@ -265,14 +272,89 @@ export class Clip {
   }
 }
 
+class Event {
+  clip: Clip;
+  eventType: string;
+  constructor(clip: Clip, event: string) {
+    this.clip = clip;
+    this.eventType = event; 
+  }
+}
+
 export class Stage {
-  clips: Map<string, Clip>
-  constructor() {
+  clips: Map<string, Clip>;
+  ratio: PositionInfo;
+  events: Array<Event>;
+  eventHandler: Map<string, (c:Clip)=> void>;
+  stageHeight: number;
+  stageWidth: number;
+  constructor(stageWidth: number, stageHeight: number) {
     this.clips = new Map();
+    this.eventHandler = new Map();
+    this.stageWidth = stageWidth;
+    this.stageHeight = stageHeight;
+    this.events = [];
+    this.ratio = {
+        ratio:0,
+        top:0,
+        left: 0,
+      }
   }
-  addClip(name: string, clip: Clip) {
-    this.clips.set(name, clip);
+
+  emitEvent(clip: Clip, eventType: string) {
+    const handler = this.eventHandler.get(clip.name);
+    if (handler) {
+      handler(clip);
+    }
+    //this.events.unshift(new Event(clip, eventType));
   }
+
+  registerEventHandler(clip: Clip, cb: (c:Clip) => void) {
+    this.eventHandler.set(clip.name, cb);
+  }
+
+  getRectRatio(effW: number, effH: number): PositionInfo {
+    if (effW == 0 || effH == 0) {
+      return {
+        ratio:0,
+        top:0,
+        left: 0,
+      }
+    }
+    if ((effW/effH) > (this.stageWidth/this.stageHeight)) {
+      // spread to fit height
+      const ratio = effW / this.stageWidth;
+      const height = ratio * this.stageHeight;
+      return {
+        ratio: ratio,
+        top: (effH - height)/2,
+        left: 0,
+      }
+    } else {
+      // spread to fit width
+      const ratio = effH / this.stageHeight;
+      const width = ratio * this.stageWidth;
+      return {
+        ratio: ratio,
+        top: 0,
+        left: (effW - width)/2,
+      }
+    }
+  }
+
+  setRatio(r: PositionInfo) {
+    this.ratio = r;
+  }
+
+
+  addClip(clip: Clip) {
+    this.clips.set(clip.name, clip);
+  }
+
+  removeClip(clipName: string) {
+    this.clips.delete(clipName);
+  }
+
   getClip(name: string) {
     return this.clips.get(name);
   }
@@ -290,5 +372,4 @@ export class Stage {
     }
   }
 }
-
 

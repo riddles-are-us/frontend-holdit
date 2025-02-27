@@ -13,7 +13,7 @@ import ChatHistoryInput from "../components/chat";
 import Event from "../components/event";
 import BetHistory from "../components/BetHistory";
 import Overview from "../components/Overview";
-import { stage }  from "../components/canvas";
+import { stage }  from "../animation/spirite";
 import {SpanButton} from "../components/Ratio";
 
 import padLeft from "../images/ratio/frame_left.png";
