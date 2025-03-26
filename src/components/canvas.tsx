@@ -6,11 +6,29 @@ import { stage } from "../animation/spirite";
 
 setInterval(()=>{
   const canvas = document.getElementById("canvas");
+
   if (canvas) {
-     stage.draw(canvas as HTMLCanvasElement);
+    const context = (canvas as HTMLCanvasElement).getContext("2d")!;
+    const dc = {
+        clear: () => {
+            context.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+        },
+        drawImage: (image:HTMLImageElement, sx:number, sy:number, sw:number, sh:number, dx:number, dy:number, dw:number, dh:number) => {
+            context.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+        },
+            drawText: (message: string, left: number, top: number, msgWidth: number) => {
+            context.fillStyle = "black";  // Red color
+            context.fillRect(left, top, msgWidth, 20);
+            context.fillStyle = "white";  // Red color
+            context.font = "12px Arial";
+            context.fillText(message, left, top); // text, x, y
+
+        }
+    }
+    stage.draw(dc);
   }}, 50);
 
-const SquareCanvas = (params: {stage: Stage} ) => {
+const SquareCanvas = (params: {stage: Stage<HTMLImageElement>} ) => {
    const canvasRef = useRef<HTMLCanvasElement | null>(null);
    const [ratio, setRatio] = useState(params.stage.getRectRatio(0,0));
    const resizeCanvas = () => {

@@ -24,7 +24,7 @@ const LeftPanel = forwardRef((props, ref: ForwardedRef<HTMLDivElement>) => {
     dispatch(setUIState({modal:null}));
   }
   return (
-    <div id="chat-history" className={uiState.modal != null ? "historyShow" : "historyHide"}>
+    <div id="left-panel" className={uiState.modal != null ? "historyShow" : "historyHide"}>
       <div ref={ref}></div>
       <div className={`vertical-span-button ${uiState.modal != null? 'Show' : 'Hide'}`}>
         <VerticalSpanButton topPadHeight={77} bottomPadHeight={77} width={53} topPadImage={padTopImage.src} bottomPadImage={padBottomImage.src} midPadImage={padMidImage.src} midHeight ={388}>

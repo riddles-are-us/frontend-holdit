@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {Col, Container, Row} from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import {AccountSlice} from 'zkwasm-minirollup-browser';
 import {useAppDispatch, useAppSelector} from '../app/hooks';
@@ -27,24 +28,20 @@ export default function BetHistory(properties: {lpanel: HTMLDivElement}) {
     return (
     <>
       <h4>Your game history</h4>
-    <table className="w-full border border-gray-200 shadow-md mt-2">
-      <thead>
-      <tr className="bg-gray-100 text-left">
-        <th className="p-2 border">Round</th>
-        <th className="p-2 border">Betting Amount</th>
-        <th className="p-2 border">Checkout Amount</th>
-      </tr>
-      </thead>
-        <tbody>
+       <Container fluid className="p-3">
+         <Row className="bg-light font-weight-bold">
+           <Col>Round </Col>
+           <Col>Betting Amount</Col>
+           <Col>Checkout Amount</Col>
+         </Row>
         {history.map((item, index) => (
-          <tr key={index} className="hover:bg-gray-50">
-            <td className="p-2 border">{item.round}</td>
-            <td className="p-2 border">{item.bet}</td>
-            <td className="p-2 border">{item.checkout}</td>
-          </tr>
+         <Row className="border">
+           <Col>{item.round}</Col>
+           <Col>{item.bet}</Col>
+           <Col>{item.checkout}</Col>
+         </Row>
         ))}
-        </tbody>
-      </table>
+       </Container>
     </>
     )
   }

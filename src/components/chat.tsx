@@ -92,6 +92,11 @@ function encodePID(pubkey: string) {
   return (`0x${pid[1].toString(16)}${pid[2].toString(16)}`)
 }
 
+function encodePIDShort(pubkey: string) {
+  const pid = new LeHexBN(pubkey).toU64Array();
+  return (`0x${pid[1].toString(16).slice(0,4)}...${pid[2].toString(16).slice(12, 16)}`)
+}
+
 
 function decodeComments(dataArray: CommentInfo[]) {
   const msgs = dataArray.map((x) => {
@@ -175,7 +180,9 @@ const ChatHistoryInput = (properties: {lpanel: HTMLDivElement}) => {
           <h4>Live Chat:</h4>
           <ul style={{ listStyleType: 'none', padding: 0 }}>
             {history.map((item, index) => (
-               <li key={index} style={{ margin: '5px 0' }}>{encodePID(item.pubkey)}: {item.msg}</li>
+               <li key={index} style={{ margin: '0' }}>
+                 <span style={{color:"#eee"}}>{encodePIDShort(item.pubkey)}:</span> {item.msg}
+               </li>
             ))}
           </ul>
         </div>

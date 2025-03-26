@@ -23,7 +23,6 @@ import {selectUIState} from "../data/ui";
 import {Menu} from "../components/Menu";
 import LeftPanel from "../components/LeftPanel";
 import {WithdrawModal} from "../components/Common";
-import BetButton from "../components/Bet";
 import MultiplyImage from "../images/multiply.png";
 
 const padLeftImage = new Image();
@@ -81,6 +80,7 @@ export function Main() {
   }, [connectState]);
 
 
+
   return (
     <>
       <div id="right-panel">
@@ -94,7 +94,7 @@ export function Main() {
                       <div className="automargin">
                         <div className="left20">
                           <img src={MultiplyImage}/>
-                          <span>{userState?.state?.ratio / 100}</span>
+                          <span>{(userState?.state?.ratio / 100).toFixed(2)}</span>
                         </div>
                       </div>
               </SpanButton>
@@ -117,10 +117,7 @@ export function Main() {
 
         <div className="control">
         </div>
-        {userState?.state?.ratio == 0 &&
-          <div className='explode'>
-          </div>
-        }
+
         <Menu handleRestart={()=>{return}}></Menu>
         {lpanel.current && userState?.player &&
           <BetHistory lpanel={lpanel.current}></BetHistory>
@@ -128,7 +125,6 @@ export function Main() {
 
       </div>
 
-      <BetButton></BetButton>
       <LeftPanel ref = {lpanel}></LeftPanel>
 
 

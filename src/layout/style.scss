@@ -73,17 +73,6 @@ div.banner {
 
 }
 
-div.explode {
-  background:url("../images/explode.png") no-repeat center center;
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  right: 0px;
-  left: 0px;
-  background-size: cover;
-}
-
-
 
 div.tower {
   background:url("../images/front-tower.png") no-repeat fixed center;
@@ -359,7 +348,7 @@ div.Hide {
   left: -100px;
 }
 
-#chat-history {
+#left-panel {
   position: absolute;
   bottom: 0px;
   left: 0px;

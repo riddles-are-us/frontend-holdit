@@ -12,13 +12,13 @@ export class ClipRect {
   }
 }
 
-export class SpiriteInfo {
+export class SpiriteInfo<Image> {
   height: number;
   width: number;
   name: string;
   clips: Array<ClipRect>;
-  src: HTMLImageElement;
-  constructor(name:string, width: number, height: number, src: HTMLImageElement) {
+  src: Image;
+  constructor(name:string, width: number, height: number, src: Image) {
     this.width = width;
     this.height = height;
     this.name = name;
@@ -33,42 +33,62 @@ export interface PositionInfo {
   left: number;
 }
 
-export interface Target {
+export class Target<Image> {
   top: number;
   left: number;
-  handler: (clip: Clip) => void;
+  handler: (clip: Clip<Image>) => void;
+  constructor(top:number, left:number, handler: (clip: Clip<Image>)=>void) {
+    this.top = top;
+    this.left = left;
+    this.handler = handler;
+  }
 }
 
-export class Clip {
+interface ClipInfo<Image> {
+  spirite: SpiriteInfo<Image>;
+  topOffset: number;
+  leftOffset: number;
+}
+
+interface DrawingContext<Image> {
+  drawImage: (image: Image, sleft:number, stop:number, sw: number, sh:number, left:number, top:number, w:number, h:number) => void;
+  drawText: (message: string, left: number, top: number, width: number) => void; // text, x, y
+  clear: () => void;
+}
+
+export class Clip<Image> {
   name: string;
-  top: number;
-  left: number;
   vx: number;
   vy: number;
   boundry: ClipRect;
-  clips: Map<string, SpiriteInfo>;
+  clips: Map<string, ClipInfo<Image>>;
   currentFrame: number | null;
   currentClip: string | null;
-  stage: Stage;
+  top: number;
+  left: number;
+  stage: Stage<Image>;
+  speed: number;
   focus: boolean;
   hover: boolean;
   halted: boolean;
-  target: Array<Target>;
+  target: Array<Target<Image>>;
   active: boolean;
   stopFrame: number | null;
   zIndex: number;
-  stopCallback: (c: Clip) => void;
+  stopCallback: (c: Clip<Image>) => void;
+  message: string;
 
-  constructor(name: string, boundry: ClipRect, zIndex: number, stage: Stage) {
+  constructor(name: string, boundry: ClipRect, zIndex: number, stage: Stage<Image>) {
     this.name = name;
     this.boundry = boundry;
+    this.speed = 1;
     this.vx = 0;
     this.vy = 0;
-    this.top = 0;
-    this.left = 0;
     this.currentFrame = null;
     this.currentClip = null;
-    this.clips = new Map<string, SpiriteInfo>();
+    this.clips = new Map<string, ClipInfo<Image>>();
+    this.top = 0;
+    this.left = 0;
     this.stage = stage;
     this.focus = false;
     this.hover = false;
@@ -77,7 +97,8 @@ export class Clip {
     this.active = false;
     this.stopFrame = null;
     this.zIndex = zIndex;
-    this.stopCallback = (c: Clip) => {return;};
+    this.stopCallback = (_c: Clip<Image>) => {return;};
+    this.message = "";
   }
 
   show() {
@@ -98,7 +119,11 @@ export class Clip {
   }
 
   getCurrentRect() {
-    return this.clips.get(this.currentClip!)!.clips[this.currentFrame!];
+    return this.clips.get(this.currentClip!)!.spirite.clips[this.currentFrame!];
+  }
+
+  getCurrentClipInfo() {
+    return this.clips.get(this.currentClip!)!;
   }
 
   inRect(cursorLeft: number, cursorTop: number): boolean {
@@ -148,30 +173,33 @@ export class Clip {
   }
 
   getCurrentImage() {
-      return this.clips.get(this.currentClip!)!.src;
+    const rect = this.getCurrentClipInfo().spirite.src;
+    return rect;
+  }
+
+  setSpeed(speed: number) {
+    this.speed = speed;
   }
 
 
-  setSpeed() {
-    const ratio = this.stage.ratio.ratio;
+  updateSpeed() {
     if (this.target.length != 0) {
       const len = this.target.length - 1;
-      let rx = this.target[len].left - this.left;
-      let ry = this.target[len].top - this.top;
-      if (Math.abs(rx) > 10) {
-        rx = Math.sign(rx) * 10;
-      }
-      if (Math.abs(ry) > 10) {
-        ry = Math.sign(ry) * 10;
-      }
-      this.vx = rx;
-      this.vy = ry;
-      if (rx*rx + ry*ry < 5) {
+      const clipinfo = this.getCurrentClipInfo();
+      let rx = this.target[len].left - (this.left - clipinfo.leftOffset);
+      let ry = this.target[len].top - (this.top - clipinfo.topOffset);
+      const dis = Math.sqrt(rx*rx + ry*ry);
+      if (dis < 5) {
         const target = this.target.pop();
         if (this.target.length == 0) {
-          target.handler(this);
+          target!.handler(this);
           //this.stage.emitEvent(this, "ReachTarget");
         }
+      } else {
+        rx = rx * this.speed / dis;
+        ry = ry * this.speed / dis;
+        this.vx = rx;
+        this.vy = ry;
       }
     }
   }
@@ -179,7 +207,7 @@ export class Clip {
   /*
    * play from frame start to end
    */
-  playRange(start: number, end: number, stopcb: (a:Clip) => void) {
+  playRange(start: number, end: number, stopcb: (a:Clip<Image>) => void) {
     this.active = true;
     this.halted = false;
     this.currentFrame = start;
@@ -187,24 +215,18 @@ export class Clip {
     this.stopCallback = stopcb;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: DrawingContext<Image>) {
     if (this.currentClip != null && this.currentFrame != null && this.active == true) {
       const ratio = this.stage.ratio;
       const rect = this.getCurrentRect();
+      const clipinfo = this.getCurrentClipInfo();
       const w = rect.right - rect.left;
       const h = rect.bottom - rect.top;
       const src = this.getCurrentImage();
-      const left = this.left * ratio.ratio + ratio.left;
-      const top = this.top * ratio.ratio + ratio.top;
+      const left = (this.left - clipinfo.leftOffset) * ratio.ratio + ratio.left;
+      const top = (this.top - clipinfo.topOffset) * ratio.ratio + ratio.top;
       ctx.drawImage(src, rect.left, rect.top, w, h, left, top, w * ratio.ratio, h * ratio.ratio);
 
-      if (this.focus == true) {
-        ctx.fillStyle = "orange";  // Red color
-      } else {
-        ctx.fillStyle = "black";  // Red color
-      }
-
-      const fullname = `${this.name}`;
       /*
       {
         ctx.fillRect(this.left + 30, this.top - 13, fullname.length * 7 + 5, 15);
@@ -216,15 +238,27 @@ export class Clip {
       if (this.hover == true) {
         //ctx.fillStyle = 'hsl(20%, 100%, 15%)'; // Use 50% gray to desaturate
         //ctx.globalCompositeOperation = "saturation";
-        ctx.beginPath();
-        ctx.arc(this.left + 50, this.top + 50, 50, 0, 2 * Math.PI);
-        ctx.closePath();
-        ctx.setLineDash([10, 5]); // Dash of 10px and gap of 5px
-        ctx.strokeStyle = 'purple'; // Color of the dashed circle
-        ctx.lineWidth = 2;        // Thickness of the dashed line
-        ctx.stroke();
+      }
+
+      if (this.message != "") {
+        const topOff = 5;
+        const msgWidth = this.message.length * 5.5 + 5;
+        const leftOff = w * (ratio.ratio/2) - msgWidth/2;
+        ctx.drawText(this.message, left + leftOff + 5, top + topOff, msgWidth); // text, x, y
+        /*
+
+        */
       }
     }
+  }
+
+  setMessage(msg: string) {
+    this.message = msg;
+  }
+
+  setPos(top: number, left: number) {
+    this.top = top;
+    this.left = left;
   }
 
 
@@ -237,11 +271,12 @@ export class Clip {
       return;
     }
     if (this.currentFrame!=null && this.currentClip!=null && this.halted == false) {
-      const len = this.clips.get(this.currentClip)!.clips.length;
+      const clipinfo = this.getCurrentClipInfo();
+      const len = clipinfo.spirite.clips.length;
       this.currentFrame = (this.currentFrame + 1) % len;
       this.top = this.vy + this.top;
       this.left = this.vx + this.left;
-      this.setSpeed();
+      this.updateSpeed();
       if (this.target.length == 0) {
         if (this.top < this.boundry.top) {
           this.top = this.boundry.top;
@@ -264,28 +299,30 @@ export class Clip {
     this.currentFrame = start;
   }
 
-  setAnimationClip(top: number, left: number, start: number, spiriteInfo: SpiriteInfo) {
-    this.clips.set(spiriteInfo.name, spiriteInfo);
-    this.top = top;
-    this.left = left;
+  setAnimationClip(top: number, left: number, start: number, spiriteInfo: SpiriteInfo<Image>) {
+    this.clips.set(spiriteInfo.name, {
+      spirite:spiriteInfo,
+      topOffset: top,
+      leftOffset: left,
+    });
     this.currentFrame = start;
   }
 }
 
-class Event {
-  clip: Clip;
+class Event<Image> {
+  clip: Clip<Image>;
   eventType: string;
-  constructor(clip: Clip, event: string) {
+  constructor(clip: Clip<Image>, event: string) {
     this.clip = clip;
-    this.eventType = event; 
+    this.eventType = event;
   }
 }
 
-export class Stage {
-  clips: Map<string, Clip>;
+export class Stage<Image> {
+  clips: Map<string, Clip<Image>>;
   ratio: PositionInfo;
-  events: Array<Event>;
-  eventHandler: Map<string, (c:Clip)=> void>;
+  events: Array<Event<Image>>;
+  eventHandler: Map<string, (c:Clip<Image>, eventType: JSON)=> void>;
   stageHeight: number;
   stageWidth: number;
   constructor(stageWidth: number, stageHeight: number) {
@@ -301,15 +338,14 @@ export class Stage {
       }
   }
 
-  emitEvent(clip: Clip, eventType: string) {
+  public emitEvent(clip: Clip<Image>, eventInfo: JSON) {
     const handler = this.eventHandler.get(clip.name);
     if (handler) {
-      handler(clip);
+      handler(clip, eventInfo);
     }
-    //this.events.unshift(new Event(clip, eventType));
   }
 
-  registerEventHandler(clip: Clip, cb: (c:Clip) => void) {
+  registerEventHandler(clip: Clip<Image>, cb: (c:Clip<Image>) => void) {
     this.eventHandler.set(clip.name, cb);
   }
 
@@ -347,7 +383,7 @@ export class Stage {
   }
 
 
-  addClip(clip: Clip) {
+  addClip(clip: Clip<Image>) {
     this.clips.set(clip.name, clip);
   }
 
@@ -359,13 +395,11 @@ export class Stage {
     return this.clips.get(name);
   }
 
-  draw(canvas: HTMLCanvasElement) {
-    const context = (canvas as HTMLCanvasElement).getContext("2d")!;
-    context.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+  draw(context: DrawingContext<Image>) {
+    //const context = (canvas as HTMLCanvasElement).getContext("2d")!;
+    context.clear();
+    //context.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
     const carray = Array.from(this.clips.values()).sort((a,b)=> a.zIndex - b.zIndex);
-    if (carray.length > 3) {
-      console.log("error!!!!");
-    }
     for (const v of carray) {
       v.draw(context);
       v.incFrame();

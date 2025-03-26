@@ -4,6 +4,7 @@ import { addressAbbreviation } from "../utils/address";
 import {loginL1AccountAsync, loginL2AccountAsync} from "zkwasm-minirollup-browser/src/reduxstate";
 import {selectUIState, setUIState, ModalIndicator} from "../data/ui";
 import {selectUserState} from "../data/state";
+import BetButton from "../components/Bet";
 interface IProps {
   handleRestart: () => void;
 }
@@ -40,9 +41,17 @@ export function Menu(props: IProps) {
     dispatch(setUIState({modal: ModalIndicator.DEPOSIT}))
   }
 
+  function MainButton() {
+     if (userState?.player != null) {
+         return <BetButton></BetButton>
+     } else {
+         return <div onClick={login} className="audience-mode"> Sign In </div>
+     }
+  }
+
   return (
     <div className="fade-in">
-      <div onClick={login} className='avator'>
+      <div className='avator'>
       </div>
       <div className='balance'>Balance: {userState?.player?.data.balance}</div>
 
@@ -52,6 +61,10 @@ export function Menu(props: IProps) {
       </div>
       <div className='deposit-btn' onClick={()=> switchDepositPanel()}>
       </div>
+      {userState?.player != null && <BetButton></BetButton>}
+      {userState?.player == null &&
+         <div onClick={login} className="audience-mode"> Sign In </div>
+      }
    </div>
   )
 }
